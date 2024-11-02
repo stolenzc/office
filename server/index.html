@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Is {{.UserName}} working?</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f8ff;
+            font-family: 'Arial', sans-serif;
+            color: #333;
+            text-align: center;
+        }
+
+        .status-container {
+            border: 2px solid #4caf50;
+            border-radius: 10px;
+            padding: 20px;
+            background-color: white;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .status {
+            font-size: 2em;
+            margin: 10px 0;
+        }
+
+        .indicator {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            margin: auto;
+            transition: background-color 0.3s ease;
+        }
+
+        .online {
+            background-color: #4caf50;
+        }
+
+        .offline {
+            background-color: #f44336;
+        }
+
+        .remark {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+            width: 300px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="status-container">
+        <h1>{{.UserName}}在电脑旁边吗?</h1>
+        <div class="indicator offline" id="statusIndicator"></div>
+        <div class="status" id="statusText">不在电脑旁边</div>
+        <div class="remark" id="remarkText"></div>
+    </div>
+
+    <script>
+        let lastOnlineTime = "{{.LastOnlineTime}}"
+        let isOnline = "{{.Status}}" === "online" ? true : false;
+        updateStatus()
+
+        function updateStatus() {
+            const indicator = document.getElementById('statusIndicator');
+            const statusText = document.getElementById('statusText');
+            const remarkText = document.getElementById('remarkText');
+
+            if (isOnline) {
+                indicator.classList.remove('offline');
+                indicator.classList.add('online');
+                statusText.textContent = "在电脑旁边";
+                remarkText.textContent = "可能在忙，急事Ding他一下"
+            } else {
+                indicator.classList.remove('online');
+                indicator.classList.add('offline');
+                statusText.textContent = "不在电脑旁边";
+                remarkText.innerHTML = "最后在线时间：" + lastOnlineTime +"<br>急事电话他！"
+            }
+        }
+    </script>
+</body>
+
+</html>
+
