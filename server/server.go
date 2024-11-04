@@ -91,9 +91,9 @@ func main() {
 	}
 	status = Status{LastTime: time.Now(), IsMeeting: false, UserName: config.UserName}
 
-	http.HandleFunc("/index", indexHandler)
-	http.HandleFunc("/office", updateStatusHandler)
-	http.HandleFunc("/office/status", getStatusHandler)
+	http.HandleFunc("/office/index", indexHandler)
+	http.HandleFunc("/office/updateStatus", updateStatusHandler)
+	http.HandleFunc("/office/getStatus", getStatusHandler)
 
 	// 启动HTTP服务器
 	addr := fmt.Sprint(":", config.Port)
