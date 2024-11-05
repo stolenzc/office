@@ -14,7 +14,7 @@ type Config struct {
 	UserName string `json:"user_name"`
 }
 
-func (c *Config)loadConfig(filePath string) (error) {
+func (c *Config) loadConfig(filePath string) error {
 	data, err := os.ReadFile(filePath)
 	if err != nil {
 		return err
@@ -39,16 +39,18 @@ type HTMLData struct {
 	LastOnlineTime string `json:"last_online_time"`
 }
 
+func getStatus() HTMLData {
+	htmlData := HTMLData{Status: "offline", LastOnlineTime: status.LastTime.Format("2006-01-02 15:04:05")}
+	htmlData.UserName = config.UserName
+	if time.Since(status.LastTime) < 10*time.Second {
+		htmlData.Status = "online"
+	}
+	return htmlData
+}
+
 func indexHandler(w http.ResponseWriter, r *http.Request) {
 	// 准备状态数据
-	htmlData := HTMLData{}
-	htmlData.UserName = config.UserName
-	if time.Since(status.LastTime) < 20*time.Second {
-		htmlData.Status = "online"
-	} else {
-		htmlData.Status = "offline"
-		htmlData.LastOnlineTime = status.LastTime.Format("2006-01-02 15:04:05")
-	}
+	htmlData := getStatus()
 
 	// 解析模板文件
 	temp, err := template.ParseFiles("./index.html")
@@ -75,10 +77,7 @@ func updateStatusHandler(w http.ResponseWriter, r *http.Request) {
 
 // 查询状态
 func getStatusHandler(w http.ResponseWriter, r *http.Request) {
-	response := HTMLData{Status: "offline", LastOnlineTime: status.LastTime.Format("2006-01-02 15:04:05")}
-	if time.Since(status.LastTime) < 30*time.Second {
-		response.Status = "online"
-	}
+	response := getStatus()
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(response)
 }
