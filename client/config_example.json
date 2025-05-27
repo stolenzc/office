@@ -1,3 +1,4 @@
 {
-    "server_address": "http://your/server/address"
+    "server_address": "http://your/server/address",
+    "expected_ssid": "your_wifi_ssid"
 }

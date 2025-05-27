@@ -67,9 +67,9 @@
 
 <body>
     <div class="status-container">
-        <h1>{{.UserName}}在电脑旁边吗?</h1>
+        <h1>{{.UserName}}在办公室吗?</h1>
         <div class="indicator offline" id="statusIndicator"></div>
-        <div class="status" id="statusText">不在电脑旁边</div>
+        <div class="status" id="statusText">不在办公室</div>
         <div class="remark" id="remarkText"></div>
         <!-- <button class="dingdingBtn" id="dingdingBtn"></button> -->
     </div>
@@ -88,13 +88,13 @@
             if (isOnline) {
                 indicator.classList.remove('offline');
                 indicator.classList.add('online');
-                statusText.textContent = "在电脑旁边";
+                statusText.textContent = "在办公室";
                 remarkText.textContent = "可能在忙，急事Ding他一下"
             } else {
                 indicator.classList.remove('online');
                 indicator.classList.add('offline');
-                statusText.textContent = "不在电脑旁边";
-                remarkText.innerHTML = "最后在线时间：" + lastOnlineTime +"<br>急事电话他！"
+                statusText.textContent = "不在办公室";
+                remarkText.innerHTML = "最后离开时间：" + lastOnlineTime +"<br>急事电话他！"
             }
         }
     </script>

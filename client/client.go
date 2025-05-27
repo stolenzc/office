@@ -13,6 +13,7 @@ import (
 
 type Config struct {
 	ServerAddress string `json:"server_address"`
+	ExpectedSSID string `json:"expected_ssid"` // 添加预期的WiFi名称配置
 }
 
 func (c *Config) loadConfig(filePath string) error {
@@ -39,7 +40,19 @@ func isScreenLocked() (bool, error) {
 		return false, fmt.Errorf("%w: %v", err, outErr.String())
 	}
 	return strings.Contains(out.String(), "True"), nil
+}
 
+// 新增函数：检测当前连接的WiFi
+func getCurrentSSID() (string, error) {
+	// 这个命令在Linux/macOS上获取当前WiFi SSID
+	cmd := exec.Command("iwgetid", "-r")
+	var out bytes.Buffer
+	cmd.Stdout = &out
+	err := cmd.Run()
+	if err != nil {
+		return "", fmt.Errorf("failed to get SSID: %v", err)
+	}
+	return strings.TrimSpace(out.String()), nil
 }
 
 func updateStatus(url string) {
@@ -59,22 +72,37 @@ func updateStatus(url string) {
 
 func main() {
 	var config = Config{}
-	config.loadConfig("./config.json")
-	for {
+	err := config.loadConfig("./config.json")
+	if err != nil {
+		fmt.Println("Error loading config:", err)
+		return
+	}
 
+	for {
+		// 检查屏幕锁定状态
 		locked, err := isScreenLocked()
 		if err != nil {
 			fmt.Println("Error checking screen lock status:", err)
-			return
+			time.Sleep(5 * time.Second)
+			continue
 		}
 
-		if !locked {
+		// 检查WiFi连接
+		currentSSID, err := getCurrentSSID()
+		if err != nil {
+			fmt.Println("Error checking WiFi connection:", err)
+			time.Sleep(5 * time.Second)
+			continue
+		}
+
+		// 只有当屏幕未锁定且连接了正确的WiFi时才更新状态
+		if !locked && currentSSID == config.ExpectedSSID {
 			updateStatus(config.ServerAddress)
-			// 	fmt.Println("Screen is unlocked.", time.Now())
-			// } else {
-			// 	fmt.Println("Screen is locked.", time.Now())
+			fmt.Printf("Screen is unlocked and connected to %s. %v\n", currentSSID, time.Now())
+		} else {
+			fmt.Printf("Conditions not met (locked: %v, SSID: %s). %v\n", locked, currentSSID, time.Now())
 		}
 
-		time.Sleep(5 * time.Second) // 每5秒检查一次
+		time.Sleep(5 * time.Second)
 	}
 }
