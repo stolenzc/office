@@ -55,6 +55,17 @@ func getCurrentSSID() (string, error) {
 	return strings.TrimSpace(out.String()), nil
 }
 
+func getCurrentSSIDOnMac() (string, error) {
+	cmd := exec.Command("./wifi")
+	var out bytes.Buffer
+	cmd.Stdout = &out
+	err := cmd.Run()
+	if err != nil {
+		return "", fmt.Errorf("failed to get SSID: %v", err)
+	}
+	return strings.TrimSpace(out.String()), nil
+}
+
 func updateStatus(url string) {
 	// PUT请求的Body
 	body := bytes.NewBufferString("{ \"key\": \"value\" }")
@@ -88,7 +99,7 @@ func main() {
 		}
 
 		// 检查WiFi连接
-		currentSSID, err := getCurrentSSID()
+		currentSSID, err := getCurrentSSIDOnMac()
 		if err != nil {
 			fmt.Println("Error checking WiFi connection:", err)
 			time.Sleep(5 * time.Second)
@@ -96,7 +107,7 @@ func main() {
 		}
 
 		// 只有当屏幕未锁定且连接了正确的WiFi时才更新状态
-		if !locked && currentSSID == config.ExpectedSSID {
+		if !locked && (config.ExpectedSSID == "" || currentSSID == config.ExpectedSSID) {
 			updateStatus(config.ServerAddress)
 			fmt.Printf("Screen is unlocked and connected to %s. %v\n", currentSSID, time.Now())
 		} else {
