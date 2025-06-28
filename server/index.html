@@ -2,9 +2,9 @@
 <html lang="zh-CN">
 
 <head>
-    <meta charset="UTF-8">
+    <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Is {{.UserName}} working?</title>
+    <title>Is {{.UserName}} In Office?</title>
     <style>
         body {
             overflow: hidden;   /* 隐藏滚动条 */
@@ -48,7 +48,6 @@
             background-color: #f44336;
         }
 
-        .dingdingBtn,
         .remark {
             margin-top: 20px;
             padding: 10px;
@@ -62,6 +61,28 @@
             justify-content: center;
             color: #666;
         }
+
+        .dingTalkBtn,
+        button {
+            background-color: #0086F6;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 17px;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 500;
+            width: 100%;
+            max-width: 300px;
+            margin-top: 20px;
+        }
+        button:hover {
+            background-color: #0070cc;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0,134,246,0.3);
+        }
+
     </style>
 </head>
 
@@ -71,7 +92,7 @@
         <div class="indicator offline" id="statusIndicator"></div>
         <div class="status" id="statusText">不在办公室</div>
         <div class="remark" id="remarkText"></div>
-        <!-- <button class="dingdingBtn" id="dingdingBtn"></button> -->
+        <button class="dingTalkBtn" id="dingTalkBtn" title="快速联系" onclick="callDingTalk()">快速联系</button>
     </div>
 
     <script>
@@ -79,17 +100,23 @@
         let isOnline = "{{.Status}}" === "online" ? true : false;
         updateStatus()
 
+        // https://open.dingtalk.com/document/isvapp/unified-routing-protocol
+        // https://open.dingtalk.com/document/isvapp/applink-structure
+        function callDingTalk() {
+            window.location.href = "dingtalk://dingtalkclient/action/sendmsg?dingtalk_id={{.DingTalkID}}";
+        }
+
         function updateStatus() {
             const indicator = document.getElementById('statusIndicator');
             const statusText = document.getElementById('statusText');
             const remarkText = document.getElementById('remarkText');
-            // const dingdingBtn = document.getElementById('dingdingBtn');
+            const dingTalkBtn = document.getElementById('dingTalkBtn');
 
             if (isOnline) {
                 indicator.classList.remove('offline');
                 indicator.classList.add('online');
                 statusText.textContent = "在办公室";
-                remarkText.textContent = "可能在忙，急事Ding他一下"
+                remarkText.textContent = "可能在忙，急事Ding一下"
             } else {
                 indicator.classList.remove('online');
                 indicator.classList.add('offline');
@@ -97,8 +124,30 @@
                 remarkText.innerHTML = "最后离开时间：" + lastOnlineTime +"<br>急事电话他！"
             }
         }
+
+        function fetchStatusUpdate() {
+            fetch('/office/getStatus')
+                .then(response => response.json())
+                .then(data => {
+                    isOnline = data.status === "online";
+                    lastOnlineTime = data.last_online_time;
+                    updateStatus();
+                })
+                .catch(error => console.error('Error fetching status:', error));
+        }
+
+        let updateDuration = 3000; // 每3秒更新一次状态
+
+        let timer = setInterval(fetchStatusUpdate, updateDuration);
+        // 如果页面不活跃，取消定时任务
+        window.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                clearInterval(timer);
+            } else {
+                timer = setInterval(fetchStatusUpdate, updateDuration);
+            }
+        });
     </script>
 </body>
 
 </html>
-

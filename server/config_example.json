@@ -1,4 +1,5 @@
 {
     "port": 8080,
-    "user_name": "stolen"
+    "user_name": "stolen",
+    "dingtalk_id": "dingtalk_id_example"
 }

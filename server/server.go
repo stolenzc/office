@@ -10,8 +10,9 @@ import (
 )
 
 type Config struct {
-	Port     int    `json:"port"`
-	UserName string `json:"user_name"`
+	Port       int    `json:"port"`
+	UserName   string `json:"user_name"`
+	DingTalkID string `json:"dingtalk_id"`
 }
 
 func (c *Config) loadConfig(filePath string) error {
@@ -37,11 +38,13 @@ type HTMLData struct {
 	UserName       string `json:"user_name"`
 	Status         string `json:"status"`
 	LastOnlineTime string `json:"last_online_time"`
+	DingTalkID     string `json:"dingtalk_id"`
 }
 
 func getStatus() HTMLData {
 	htmlData := HTMLData{Status: "offline", LastOnlineTime: status.LastTime.Format("2006-01-02 15:04:05")}
 	htmlData.UserName = config.UserName
+	htmlData.DingTalkID = config.DingTalkID
 	if time.Since(status.LastTime) < 10*time.Second {
 		htmlData.Status = "online"
 	}
@@ -59,11 +62,16 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// 执行模板并将数据传入
-	w.Header().Set("Content-Type", "text/html")
+	// 设置Content-Type并执行模板
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	if err := temp.Execute(w, htmlData); err != nil {
-		http.Error(w, "渲染页面失败", http.StatusInternalServerError)
+		// 这里不能再调用http.Error，因为已经开始写入响应了
+		fmt.Printf("模板渲染失败: %v\n", err)
 	}
+}
+
+type UpdateBody struct {
+	LastTime time.Time `json:"last_time"`
 }
 
 // 处理更新在线状态请求
@@ -72,13 +80,19 @@ func updateStatusHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
-	status.LastTime = time.Now()
+	// 从请求中获取body数据
+	var updateData *UpdateBody
+	if err := json.NewDecoder(r.Body).Decode(&updateData); err != nil {
+		status.LastTime = time.Now()
+	} else {
+		status.LastTime = updateData.LastTime
+	}
 }
 
 // 查询状态
 func getStatusHandler(w http.ResponseWriter, r *http.Request) {
 	response := getStatus()
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	json.NewEncoder(w).Encode(response)
 }
 
