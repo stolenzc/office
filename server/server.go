@@ -82,10 +82,13 @@ func updateStatusHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	// 从请求中获取body数据
 	var updateData *UpdateBody
-	if err := json.NewDecoder(r.Body).Decode(&updateData); err != nil {
-		status.LastTime = time.Now()
-	} else {
+	if err := json.NewDecoder(r.Body).Decode(&updateData); err == nil {
 		status.LastTime = updateData.LastTime
+	}
+
+	// 检查零值
+	if status.LastTime.IsZero() {
+		status.LastTime = time.Now()
 	}
 }
 
