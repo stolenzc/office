@@ -15,10 +15,24 @@ server side:
 client side:
 
 1. make sure you have installed go and python
-2. create a python virtual environment using `python -m venv .venv`
-3. go to `client`
-4. using `go run client.go` to start client in your mac.
-5. you also can using `make start-client` to start client instead step 4.
+2. create a python virtual environment using `python -m venv .venv`, And install dependencies using `pip install -r requirements.txt`
+3. copy `config_example.json` to `config.json`, and edit it by yourself.
+4. go to `client`
+5. using `go run client.go` to start client in your mac.
+6. you also can using `make start-client` to start client instead step 5.
+
+## Configuration
+
+### server config
+
+- `port`: The port that server will listen on, Required.
+- `user_name`: The user name will be shown in the web page, Required.
+- `dingtalk_id`: The DingTalk ID of the user, click `快速联系` will jumps to profile page in DingTalk.
+
+### client config
+
+- `server_address`: The URL of the server, Required.
+- `expected_ssid`: The expected SSID of the Wi-Fi network, if the client is not connected to this SSID, it will be considered offline. Optional.
 
 ## Why this?
 
