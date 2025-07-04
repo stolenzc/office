@@ -1,4 +1,4 @@
 {
     "server_address": "http://your_server_domain/router_prefix/office/updateStatus",
-    "expected_ssid": "your_wifi_ssid"
+    "expected_ssid": ["your_wifi_ssid1", "your_wifi_ssid2"]
 }

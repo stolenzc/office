@@ -12,8 +12,8 @@ import (
 )
 
 type Config struct {
-	ServerAddress string `json:"server_address"`
-	ExpectedSSID string `json:"expected_ssid"` // 添加预期的WiFi名称配置
+	ServerAddress string   `json:"server_address"`
+	ExpectedSSID  []string `json:"expected_ssid"` // 添加预期的WiFi名称配置
 }
 
 func (c *Config) loadConfig(filePath string) error {
@@ -107,13 +107,14 @@ func main() {
 		}
 
 		// 只有当屏幕未锁定且连接了正确的WiFi时才更新状态
-		if !locked && (config.ExpectedSSID == "" || currentSSID == config.ExpectedSSID) {
-			updateStatus(config.ServerAddress)
-			fmt.Printf("Screen is unlocked and connected to %s. %v\n", currentSSID, time.Now())
-		} else {
-			fmt.Printf("Conditions not met (locked: %v, SSID: %s). %v\n", locked, currentSSID, time.Now())
+		for _, exceptedSSID := range config.ExpectedSSID {
+			if !locked && (exceptedSSID == "" || currentSSID == exceptedSSID) {
+				updateStatus(config.ServerAddress)
+				fmt.Printf("Screen is unlocked and connected to %s. %v\n", currentSSID, time.Now())
+			} else {
+				fmt.Printf("Conditions not met (locked: %v, SSID: %s). %v\n", locked, currentSSID, time.Now())
+			}
 		}
-
 		time.Sleep(5 * time.Second)
 	}
 }
