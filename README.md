@@ -21,6 +21,8 @@ client side:
 5. using `go run client.go` to start client in your mac.
 6. you also can using `make start-client` to start client instead step 5.
 
+automatically start client when mac boot to see [Mac README](Mac/README.md).
+
 ## Configuration
 
 ### server config
