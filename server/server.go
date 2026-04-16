@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"strconv"
 	"text/template"
 	"time"
 )
@@ -22,6 +23,25 @@ func (c *Config) loadConfig(filePath string) error {
 	}
 	err = json.Unmarshal(data, &c)
 	return err
+}
+
+func (c *Config) loadConfigFromEnv() {
+	c.Port = 8080
+	if port, ok := os.LookupEnv("PORT"); ok {
+		if portInt, err := strconv.Atoi(port); err == nil {
+			c.Port = portInt
+		}
+	}
+
+	c.UserName = "stolen"
+	if userName, ok := os.LookupEnv("USER_NAME"); ok {
+		c.UserName = userName
+	}
+
+	c.DingTalkID = "dingtalk_id_example"
+	if dingTalkID, ok := os.LookupEnv("DINGTALK_ID"); ok {
+		c.DingTalkID = dingTalkID
+	}
 }
 
 var config Config
@@ -101,10 +121,11 @@ func getStatusHandler(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	// 注册处理函数
-	err := config.loadConfig("./config.json")
-	if err != nil {
-		panic(err)
-	}
+	// err := config.loadConfig("./config.json")
+	// if err != nil {
+	// 	panic(err)
+	// }
+	config.loadConfigFromEnv()
 	status = Status{LastTime: time.Now(), IsMeeting: false, UserName: config.UserName}
 
 	http.HandleFunc("/office/index", indexHandler)
